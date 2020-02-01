@@ -20,8 +20,8 @@ class DiceCog(commands.Cog):
         await ctx.send('DICE ROLLING...')
         
     # ノーマルダイス　結果だけ返却します
-    @commands.command()
-    async def roll(self, ctx, *dice):
+    @commands.command(aliases=['rs'])
+    async def rollsimple(self, ctx, *dice):
         # コマンド解析
         dice_analyze = command_analyze(list(dice))
         print(dice_analyze)
@@ -50,16 +50,32 @@ class DiceCog(commands.Cog):
         await ctx.send(result_text)
     
     # 詳細ダイス　出目もすべて返却します
-    @commands.command()
-    async def rolldetail(self, ctx, *dice):
+    @commands.command(aliases=['r'])
+    async def roll(self, ctx, *dice):
         # コマンド解析
         dice_analyze = command_analyze(list(dice))
+        print(dice_analyze)
+        
+        error = error_check()
+        if(error != ""):
+            await ctx.send(error)
+            return 0
         
         # ダイスを振る
         roll_result = roll_dice(str(dice[0]))
-
+        
+        if('ineq' in dice_analyze.keys()):
+            diff_res = diffcheck(sum(roll_result), dice_analyze['ineq'], int(dice_analyze['base']))
+        if('crit' in dice_analyze.keys()):
+            crit_res = critcheck(sum(roll_result), dice_analyze['crit_hit_ineq'], dice_analyze['crit_hit_base'], dice_analyze['crit_split_ineq'], dice_analyze['crit_split_base'])
+        
         # リザルト出力
         result_text = 'RESULT: '+ str(sum(roll_result))
+        
+        if('ineq' in dice_analyze.keys()):
+            result_text += diff_res
+        if('crit_hit_ineq' in dice_analyze.keys()):
+            result_text += crit_res
         
         await ctx.send(roll_result)
         await ctx.send(result_text)
@@ -75,12 +91,9 @@ def command_analyze(dice):
     # 返り値の初期化(ディクショナリ)
     dice_analyze = {}
     
-    # ダイスに0が含まれればエラー
-    if(dice[0].find('0d') != -1):
+    # 0ダイスならエラー
+    if(dice[0].find('d0') != -1):
         ERROR_CODE.append("DICE_ZERO_ERROR")
-    elif(dice[0].find('0d') != -1):
-        ERROR_CODE.append("DICE_ZERO_ERROR")
-        
     else:
         # 一つ目にnDaを入れる
         dice_analyze['dice_str'] = dice[0].lower()
@@ -149,15 +162,14 @@ def roll_dice(dice):
     roll_point_list = []
     
     # dの小文字大文字両対応
-    if('d' in dice):
-        num = dice.split("d")
-        roll_times = dice.split("d")[0]
-        dice_size = dice.split("d")[1]
-    elif('D'in dice):
-        num = dice.split("D")
-        roll_times = dice.split("D")[0]
-        dice_size = dice.split("D")[1]
+    dicestring = dice.lower()
     
+    roll_times = dicestring.split("d")[0]
+    dice_size = dicestring.split("d")[1]
+    
+    if(dice_size == ""):
+        dice_size = 6
+
     for i in range(int(roll_times)):
         roll_point_list.append(random.randrange(1,int(dice_size)))
     
@@ -237,5 +249,5 @@ def error_check():
     if('CRIT_PARAM_ERROR' in ERROR_CODE):
         error_res += " critコマンド引数を確認してください"
     if('DICE_ZERO_ERROR' in ERROR_CODE):
-        error_res += " 0回または出目が0のダイスは振れません"
+        error_res += " 出目が0のダイスは振れません"
     return error_res
