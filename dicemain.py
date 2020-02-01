@@ -1,6 +1,9 @@
 from discord.ext import commands # Bot Commands Frameworkをインポート
 
 import traceback # エラー表示のためにインポート
+import os
+
+token = os.environ['DISCORD_BOT_TOKEN']
 
 # 読み込むコグの名前を格納しておく。
 INITIAL_EXTENSIONS = [
@@ -34,4 +37,4 @@ class Dice(commands.Bot):
 # MyBotのインスタンス化及び起動処理。
 if __name__ == '__main__':
     bot = Dice(command_prefix='$') # command_prefixはコマンドの最初の文字として使うもの。 e.g. !ping
-    bot.run('NjY0ODM3NDU4MDYzNTIzODQx.Xhc4bw.3zPfjriWpJbiWAyp7B6MRuUc0w8') # Botのトークン
+    bot.run(token) # Botのトークン
