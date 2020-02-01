@@ -36,5 +36,5 @@ class Dice(commands.Bot):
 
 # MyBotのインスタンス化及び起動処理。
 if __name__ == '__main__':
-    bot = Dice(command_prefix='$') # command_prefixはコマンドの最初の文字として使うもの。 e.g. !ping
+    bot = Dice(command_prefix='$')
     bot.run(token) # Botのトークン
