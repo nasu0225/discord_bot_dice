@@ -101,6 +101,23 @@ def command_analyze(dice):
     # 20個までNoneで満たす
     dicearray = fillArray(dice)
     
+    if ('+' in dicearray):
+        calc_index = dicearray.index('+')
+        calc_point = dicearray[calc_index + 1]
+        if (calc_point.isnumeric() == true):
+            dice_analyze['calc_mark'] = '+'
+            dice_analyze['calc_point'] = calc_point
+        else:
+            ERROR_CODE.append("CALC_ERROR")
+    if ('-' in dicearray):
+        calc_index = dicearray.index('-')
+        calc_point = dicearray[calc_index + 1]
+        if (calc_point.isnumeric() == true):
+            dice_analyze['calc_mark'] = '-'
+            dice_analyze['calc_point'] = calc_point
+        else:
+            ERROR_CODE.append("CALC_ERROR")
+    
     # クリティカルトリガーを検索　※ただの不等式と併用不可
     if ('crit' in dicearray):
         crit_index = dicearray.index('crit')
@@ -165,13 +182,13 @@ def roll_dice(dice):
     dicestring = dice.lower()
     
     roll_times = dicestring.split("d")[0]
-    dice_size = dicestring.split("d")[1]
+    dice_size  = dicestring.split("d")[1]
     
     if(dice_size == ""):
         dice_size = 6
 
     for i in range(int(roll_times)):
-        roll_point_list.append(random.randrange(1,int(dice_size)))
+        roll_point_list.append(random.randrange(1,int(dice_size)+1))
     
     return roll_point_list
 
@@ -250,4 +267,6 @@ def error_check():
         error_res += " critコマンド引数を確認してください"
     if('DICE_ZERO_ERROR' in ERROR_CODE):
         error_res += " 出目が0のダイスは振れません"
+    if('CALC_ERROR' in ERROR_CODE):
+        error_res += " 計算項目が不正です"
     return error_res
