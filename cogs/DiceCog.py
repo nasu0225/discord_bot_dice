@@ -75,6 +75,7 @@ class DiceTool(commands.Cog):
     # @commands.command()
     # async def set(self, ctx, *str):
     
+    
     @commands.command()
     async def test(self, ctx, *str):
         currentdir = os.getcwd()
