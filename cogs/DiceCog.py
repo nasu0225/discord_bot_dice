@@ -16,7 +16,7 @@ class RollError(Exception):
 # 作り忘れてる部分を探してなんかうまいことやる
 
 # [本体]========================================================================
-class DiceTool(commands.Cog):
+class DiceCog(commands.Cog):
     #__init__
     def __init__(self, bot):
         self.bot = bot
@@ -85,7 +85,7 @@ class DiceTool(commands.Cog):
 # Bot本体側からコグを読むときの関数
 def setup(bot):
     # Botにコグとして登録
-    bot.add_cog(DiceTool(bot))
+    bot.add_cog(DiceCog(bot))
 
 # パラメータのうちダイスをロールする
 def rollDiceComArray(com_list):
