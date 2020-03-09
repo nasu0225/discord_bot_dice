@@ -131,9 +131,12 @@ def setRollResultToCom(dice, roll):
 
 def getCalcDice(com):
     # 足し算or引き算しか使えないようにする
-    com = map(str, com)
-    joincom = ' '.join(com)
+    com = list(map(str, com))
+    joincom = ' '.join(com) + ' '
     
-    a = eval(joincom)
+    if(re.fullmatch(r'([0-9]* +[+-]? *[0-9]*)+', joincom)):
+        a = eval(joincom)
+    else:
+        raise RollError('適さない数式が入力されました。コマンドを確認して下さい。')
     
     return a
