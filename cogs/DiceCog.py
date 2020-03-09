@@ -75,10 +75,10 @@ class DiceCog(commands.Cog):
     # @commands.command()
     # async def set(self, ctx, *str):
     
-    # @commands.command()
-    # async def test(self, ctx, *str):
-    #     currentdir = os.getcwd()
-    #     await ctx.send(currentdir)
+    @commands.command()
+    async def test(self, ctx, *str):
+        currentdir = os.getcwd()
+        await ctx.send(currentdir)
 
 # [パーツ]=======================================================================
 
