@@ -16,7 +16,7 @@ class RollError(Exception):
 # 作り忘れてる部分を探してなんかうまいことやる
 
 # [本体]========================================================================
-class DiceTool(commands.Cog):
+class DiceCog(commands.Cog):
     #__init__
     def __init__(self, bot):
         self.bot = bot
