@@ -16,7 +16,7 @@ class RollError(Exception):
 # 作り忘れてる部分を探してなんかうまいことやる
 
 # [本体]========================================================================
-class DiceCog(commands.Cog):
+class DiceTool(commands.Cog):
     #__init__
     def __init__(self, bot):
         self.bot = bot
@@ -35,10 +35,12 @@ class DiceCog(commands.Cog):
             if(len(dice) == 0):
                 dice.append("1d6")
             
-            # 保持した値を検索し置き換える
             # DEBUG:
             expandDice = dice
             forError = ' '.join(map(str, expandDice))
+            
+            # 保持した値を検索し置き換える
+            expandDice = convertKey(expandDice)
             
             # ダイスを振る
             rolledDiceCom = rollDiceComArray(expandDice)
@@ -72,13 +74,113 @@ class DiceCog(commands.Cog):
             msg += '['+','.join(map(str, rolledDiceCom[value]))+'] '
         await ctx.send('RESULT: '+msg+'\n'+mention)
     
-    # @commands.command()
-    # async def set(self, ctx, *str):
+    @commands.command()
+    async def set(self, ctx, *rec):
+        # メンションを設定
+        mention = ctx.author.mention
+        try:
+            rec = list(rec)
+            # recの最初の値はKeyになる
+            key = rec.pop(0)+' '
+            
+            # Keyはダイスまたは数式に沿う文字列に対応しません
+            if(re.fullmatch(r'([0-9]*d+[0-9]*)', key) or re.fullmatch(r'[0-9]*', key)):
+                raise RollError('キーはダイス又は数式の形式を取る文字列に対応しません')
+            # Keyを取得、比較
+            keylist = keycheck()
+            if not (keyDupCheck(keylist, key)):
+                raise RollError('キーが重複しています。')
+            
+            com = ' '.join(map(str, rec))
+            # 無効な数式 ※ダイスを振ってみて問題なければOK → 記号とかで終わる式には今の所対応しません
+            rolledDiceCom = rollDiceComArray(rec)
+            calcCom = setRollResultToCom(rec, rolledDiceCom)
+            resultDice = getCalcDice(calcCom)
+            
+            setCommand = [key[:-1],com]
+            with open('record.csv', 'a', newline="") as f:
+                writer = csv.writer(f, lineterminator="\n")
+                writer.writerow(setCommand)
+        
+        except RollError as Err:
+            await ctx.send(str(Err)+'\n'+mention)
+            return 0
+            
+        except NameError as Err:
+            await ctx.send(Err)
+            return 0
+            
+        except SyntaxError as Err:
+            await ctx.send('構文エラーです。コマンドを確認してください。\n'+'コマンド :'+ str(com) +'\n')
+            return 0
     
     @commands.command()
-    async def test(self, ctx, *str):
-        currentdir = os.getcwd()
-        await ctx.send(currentdir)
+    async def keydelete(self, ctx, key):
+        keyList = []
+        with open('record.csv') as f:
+            reader = csv.reader(f)
+            for row in reader:
+                if not(key == row[0]):
+                    keyList.append(row)
+        print(keyList)
+        
+        with open('record.csv', 'w', newline="") as f:
+            writer = csv.writer(f, lineterminator="\n")
+            writer.writerows(keyList)
+    
+    @commands.command()
+    async def get(self, ctx, *a):
+        with open('record.csv') as f:
+            await ctx.send(f.read())
+    
+    @commands.command()
+    async def check(self, ctx, *a):
+        try:
+            with open('record.csv', mode='x') as f:
+                f.write('')
+            await ctx.send('ファイルを作成しました')
+        except FileExistsError:
+            await ctx.send('ファイルは存在しています。\n初期化する場合はresetコマンドを使用してください')
+    
+    @commands.command()
+    async def reset(self, ctx, a):
+        try:
+            a = str(a)
+            if not(a == 'reset'):
+                raise RollError('パスワードが違います')
+            
+            shutil.copy('record.csv', 'record.csv.bac')
+            with open('record.csv', 'w') as f:
+                f.write('')
+            await ctx.send('ファイルを初期化しました')
+        
+        except RollError as Err:
+            await ctx.send(Err)
+    
+    @commands.command()
+    async def restore(self, ctx, a):
+        try:
+            a = str(a)
+            if not(a == 'reset'):
+                raise RollError('パスワードが違います')
+            
+            shutil.move('record.csv.bac', 'record.csv')
+            await ctx.send('リストアしました')
+        
+        except RollError as Err:
+            await ctx.send(Err)
+            
+    @commands.command()
+    async def keycheck(self, ctx, *a):
+        keycheck()
+    
+    @commands.command()
+    async def ciutk(self, ctx, a):
+        keylist = keycheck()
+        if(keyDupCheck(keylist, a)):
+            await ctx.send('使用可能')
+        else:
+            await ctx.send('kaburi')
 
 # [パーツ]=======================================================================
 
@@ -140,3 +242,37 @@ def getCalcDice(com):
         raise RollError('適さない数式が入力されました。コマンドを確認して下さい。')
     
     return a
+
+# CSVファイルから全Keyを取得して返却
+def keycheck():
+    keyList = []
+    with open('record.csv') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            keyList.append(row[0])
+    return keyList
+
+# 被りがなければTrue,あればFlaseを返却
+def keyDupCheck(keylist, key):
+    for checker in keylist:
+        if(key == checker):
+            return False
+    return True
+
+# ダイスコマンドのキーになる部分をダイスコマンドに変換する
+def convertKey(comlist):
+    conv = {}
+    print(comlist)
+    with open('record.csv') as f:
+        reader = csv.reader(f)
+        for row in reader:
+            i = 0
+            for com in comlist:
+                if (com == row[0]):
+                    conv[i] = row[1]
+                i += 1
+    for a in conv:
+        del comlist[a]
+        comlist[a:a] = conv[a].split()
+    return comlist
+    
