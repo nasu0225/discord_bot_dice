@@ -23,6 +23,7 @@ class DiceCog(commands.Cog):
     
     @commands.command(aliases=['r'])
     async def roll(self, ctx, *dice):
+        """\nサイコロを振る(略式：r)\n例：$r 1d6 引数を略すと例と同値に扱われます。\nダイスの面数を略すと6面ダイスになります。\nsetコマンドで設定した略式を利用できます。\n"""
         # 初期化
         global ERROR_CODE
         ERROR_CODE = {}
@@ -76,6 +77,7 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def set(self, ctx, *rec):
+        """\nrollコマンドで利用できる略式を設定できます。\n例：$set sample 1d6 -> $r sampleと入力すると$r 1d6と同値と扱われます。"""
         # メンションを設定
         mention = ctx.author.mention
         try:
@@ -116,6 +118,7 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def keydelete(self, ctx, key):
+        """\nsetコマンドで設定したキーを削除します"""
         keyList = []
         with open('record.csv') as f:
             reader = csv.reader(f)
@@ -130,11 +133,13 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def get(self, ctx, *a):
+        """\nsetコマンドで設定したキーの一覧を表示します"""
         with open('record.csv') as f:
             await ctx.send(f.read())
     
     @commands.command()
     async def check(self, ctx, *a):
+        """\n管理用：setコマンドで設定するキーを保持するファイルの確認をします"""
         try:
             with open('record.csv', mode='x') as f:
                 f.write('')
@@ -144,6 +149,7 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def reset(self, ctx, a):
+        """\n管理用：setコマンドで設定するキーを保持するファイルを初期化します\n※パスワードを設定してあります"""
         try:
             a = str(a)
             if not(a == 'reset'):
@@ -159,6 +165,7 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def restore(self, ctx, a):
+        """\n管理用：resetしたファイルを戻します\n※パスワードを設定してあります"""
         try:
             a = str(a)
             if not(a == 'reset'):
@@ -169,18 +176,6 @@ class DiceCog(commands.Cog):
         
         except RollError as Err:
             await ctx.send(Err)
-            
-    @commands.command()
-    async def keycheck(self, ctx, *a):
-        keycheck()
-    
-    @commands.command()
-    async def ciutk(self, ctx, a):
-        keylist = keycheck()
-        if(keyDupCheck(keylist, a)):
-            await ctx.send('使用可能')
-        else:
-            await ctx.send('kaburi')
 
 # [パーツ]=======================================================================
 
