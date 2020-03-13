@@ -155,7 +155,7 @@ class DiceCog(commands.Cog):
             if not(a == 'reset'):
                 raise RollError('パスワードが違います')
             
-            shutil.copy('record.csv', 'record.csv.bac')
+            # shutil.copy('record.csv', 'record.csv.bac')
             with open('record.csv', mode='w') as f:
                 f.write('')
             await ctx.send('ファイルを初期化しました')
@@ -165,13 +165,13 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def restore(self, ctx, a):
-        """\n管理用：resetしたファイルを戻します\n※パスワードを設定してあります"""
+        """\n管理用：resetしたファイルを戻します\n※パスワードを設定してあります※Heroku非対応"""
         try:
             a = str(a)
             if not(a == 'reset'):
                 raise RollError('パスワードが違います')
             
-            shutil.move('record.csv.bac', 'record.csv')
+            # shutil.move('record.csv.bac', 'record.csv')
             await ctx.send('リストアしました')
         
         except RollError as Err:
