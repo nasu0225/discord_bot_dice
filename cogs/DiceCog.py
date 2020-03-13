@@ -118,7 +118,7 @@ class DiceCog(commands.Cog):
     
     @commands.command()
     async def keydelete(self, ctx, key):
-        """\nsetコマンドで設定したキーを削除します"""
+        """setコマンドで設定したキーを削除します ※未実装"""
         keyList = []
         with open('record.csv') as f:
             reader = csv.reader(f)
@@ -156,7 +156,7 @@ class DiceCog(commands.Cog):
                 raise RollError('パスワードが違います')
             
             shutil.copy('record.csv', 'record.csv.bac')
-            with open('record.csv', 'w') as f:
+            with open('record.csv', mode='w') as f:
                 f.write('')
             await ctx.send('ファイルを初期化しました')
         
